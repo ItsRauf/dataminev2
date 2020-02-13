@@ -21,17 +21,21 @@ const Welcome = new RichEmbed({
  * @param {Client} DatamineBot
  */
 module.exports = function subscribe(msg, _args, _DatamineBot) {
-  return Server.findOne({ _id: msg.guild.id }, (err, doc) => {
-    if (err) return console.error(err);
-    if (doc) {
-      msg.channel.send(AlreadySubscribed);
-    } else {
-      Server.create({ _id: msg.guild.id, channel: msg.channel.id }).then(() => {
-        msg.channel.send(Welcome).then(() => {
-          const latest = require("./latest");
-          latest(msg);
-        });
-      });
-    }
-  });
+  if (msg.member.permissions.hasPermission("MANAGE_GUILD")) {
+    return Server.findOne({ _id: msg.guild.id }, (err, doc) => {
+      if (err) return console.error(err);
+      if (doc) {
+        msg.channel.send(AlreadySubscribed);
+      } else {
+        Server.create({ _id: msg.guild.id, channel: msg.channel.id }).then(
+          () => {
+            msg.channel.send(Welcome).then(() => {
+              const latest = require("./latest");
+              latest(msg);
+            });
+          }
+        );
+      }
+    });
+  }
 };

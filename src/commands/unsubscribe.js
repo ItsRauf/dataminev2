@@ -20,12 +20,14 @@ const Removed = new RichEmbed({
  * @param {Client} DatamineBot
  */
 module.exports = function subscribe(msg, _args, _DatamineBot) {
-  return Server.findOneAndDelete({ _id: msg.guild.id }, (err, doc) => {
-    if (err) return console.error(err);
-    if (doc) {
-      msg.channel.send(Removed);
-    } else {
-      msg.channel.send(NotSubscribed);
-    }
-  });
+  if (msg.member.hasPermission("MANAGE_GUILD")) {
+    return Server.findOneAndDelete({ _id: msg.guild.id }, (err, doc) => {
+      if (err) return console.error(err);
+      if (doc) {
+        msg.channel.send(Removed);
+      } else {
+        msg.channel.send(NotSubscribed);
+      }
+    });
+  }
 };
