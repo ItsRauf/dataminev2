@@ -6,7 +6,6 @@ const whitelist = require("./whitelist.json");
  * Finds commit in database
  *
  * @param {String} buildNumber
- * @param {Function} cb
  */
 function findCommit(buildNumber) {
   return Commit.findOne({ buildNumber });
@@ -57,10 +56,10 @@ module.exports = async function commitHandler() {
    */
   const commits = await axios.get(
     "https://api.github.com/repos/DJScias/Discord-Datamining/commits",
-    RequestOptions
+    RequestOptions,
   );
   const commitsWithComments = commits.data.filter(
-    (commit) => commit.commit.comment_count >= 1
+    (commit) => commit.commit.comment_count >= 1,
   );
   commitsWithComments.forEach(async (commit) => {
     const title = commit.commit.message;
@@ -83,6 +82,12 @@ module.exports = async function commitHandler() {
           title,
           description: comment.body,
           url: comment.html_url,
+          user: {
+            username: comment.user.login,
+            id: comment.user.id,
+            avatarURL: comment.user.avatar_url,
+            url: comment.user.html_url,
+          },
         };
         const images = parseImages(preCommit.description);
         if (Array.isArray(images)) {
@@ -98,7 +103,7 @@ module.exports = async function commitHandler() {
           .catch((err) =>
             console.log(
               `Error storing commit for build ${buildNumber}`,
-              err.stack
+              err.stack,
             )
           );
       }
