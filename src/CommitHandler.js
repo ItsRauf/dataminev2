@@ -56,10 +56,10 @@ module.exports = async function commitHandler() {
    */
   const commits = await axios.get(
     "https://api.github.com/repos/DJScias/Discord-Datamining/commits",
-    RequestOptions,
+    RequestOptions
   );
   const commitsWithComments = commits.data.filter(
-    (commit) => commit.commit.comment_count >= 1,
+    (commit) => commit.commit.comment_count >= 1
   );
   commitsWithComments.forEach(async (commit) => {
     const title = commit.commit.message;
@@ -103,7 +103,7 @@ module.exports = async function commitHandler() {
           .catch((err) =>
             console.log(
               `Error storing commit for build ${buildNumber}`,
-              err.stack,
+              err.stack
             )
           );
       }

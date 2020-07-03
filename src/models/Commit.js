@@ -24,7 +24,7 @@ const CommitSchema = new mongoose.Schema({
   user: {
     username: { type: String, required: true },
     id: { type: Number, required: true },
-    avatarUrl: { type: String, required: true },
+    avatarURL: { type: String, required: true },
     url: { type: String, required: true },
   },
 });
