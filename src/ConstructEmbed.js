@@ -1,4 +1,4 @@
-const { RichEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 
 /**
  * Embed Constructor
@@ -11,14 +11,15 @@ const { RichEmbed } = require("discord.js");
  * @param {String} commit.user.username
  * @param {String} commit.user.avatarURL
  * @param {String} commit.user.url
- * @returns {RichEmbed}
+ * @returns {MessageEmbed}
  */
 module.exports = function ConstructEmbed(commit) {
-  return new RichEmbed({
+  return new MessageEmbed({
     title: commit.title,
-    description: (commit.description.length > 2000)
-      ? commit.description.substr(0, 2000) + "..."
-      : commit.description,
+    description:
+      commit.description.length > 2000
+        ? commit.description.substr(0, 2000) + "..."
+        : commit.description,
     url: commit.url,
     author: {
       name: commit.user.username,

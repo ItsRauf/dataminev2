@@ -17,3 +17,6 @@ DatamineBot.on("ready", async () => {
 });
 
 DatamineBot.login(process.env.TOKEN);
+
+process.on("uncaughtException", console.log);
+process.on("unhandledRejection", console.log);

@@ -1,16 +1,20 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ServerSchema = mongoose.Schema({
   _id: {
     type: String,
-    required: true
+    required: true,
   },
   channel: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
+  roleid: {
+    type: String,
+    required: false,
+  },
 });
 
-const Server = mongoose.model('Servers', ServerSchema);
+const Server = mongoose.model("Servers", ServerSchema);
 
 module.exports = Server;

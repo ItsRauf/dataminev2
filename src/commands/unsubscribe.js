@@ -1,15 +1,15 @@
-const { Client, Message, RichEmbed } = require("discord.js");
+const { Client, Message, MessageEmbed } = require("discord.js");
 const Server = require("../models/Server");
 
-const NotSubscribed = new RichEmbed({
+const NotSubscribed = new MessageEmbed({
   title: "Datamine Updates",
   description:
-    "This channel is not subscribed. Use `d!subscribe` to receive updates!"
+    "This channel is not subscribed. Use `d!subscribe` to receive updates!",
 }).setTimestamp();
 
-const Removed = new RichEmbed({
+const Removed = new MessageEmbed({
   title: "Datamine Updates",
-  description: "This channel will not receive any more datamine updates."
+  description: "This channel will not receive any more datamine updates.",
 }).setTimestamp();
 
 /**

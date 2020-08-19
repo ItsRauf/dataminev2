@@ -14,9 +14,9 @@
   "author": "Rauf",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.0",
-    "discord.js": "^11.5.1",
+    "axios": "^0.19.2",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
-    "mongoose": "^5.7.12"
+    "mongoose": "^5.10.0"
   }
 }

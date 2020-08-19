@@ -1,4 +1,4 @@
-const { Client, Message, RichEmbed } = require("discord.js");
+const { Client, Message, MessageEmbed } = require("discord.js");
 const util = require("util");
 const vm = require("vm");
 
@@ -29,8 +29,8 @@ module.exports = async function evaluate(msg, args, DatamineBot) {
   if (code) {
     const evaled = await vm.runInNewContext(`(async () => { ${code} })()`, {
       DatamineBot,
-      RichEmbed,
-      msg
+      MessageEmbed,
+      msg,
     });
 
     let func = evaled;
@@ -38,17 +38,17 @@ module.exports = async function evaluate(msg, args, DatamineBot) {
       func = util.inspect(func);
     }
     if (func) {
-      const embed = new RichEmbed({
+      const embed = new MessageEmbed({
         fields: [
           {
             name: "Input:",
-            value: `\`\`\`js\n${code}\n\`\`\``
+            value: `\`\`\`js\n${code}\n\`\`\``,
           },
           {
             name: "Output:",
-            value: `\`\`\`js\n${func}\n\`\`\``
-          }
-        ]
+            value: `\`\`\`js\n${func}\n\`\`\``,
+          },
+        ],
       });
       msg.channel.send(embed);
     }
