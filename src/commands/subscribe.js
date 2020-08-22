@@ -21,7 +21,7 @@ const Welcome = new MessageEmbed({
  * @param {Client} DatamineBot
  */
 module.exports = function subscribe(msg, args, _DatamineBot) {
-  if (msg.member.permissions.hasPermission("MANAGE_GUILD")) {
+  if (msg.member.hasPermission("MANAGE_GUILD")) {
     return Server.findOne({ _id: msg.guild.id }, (err, doc) => {
       if (err) return console.error(err);
       if (doc) {
