@@ -32,4 +32,4 @@ If the bot finds a comment from a whitelisted user, it proceeds to post it to th
 | Latest      | Sends the latest Datamine Update to the current channel | latest {true \| role id} | \*MENTION_EVERYONE|
 | Set Role    | Sets the role to ping for Datamine Updates              | setrole \<role id\>      | MANAGE_GUILD      |
 
-*\*The MENTION_EVERYONE permisison is not required if `{true \| role id}` is not specified*
+*\*The MENTION_EVERYONE permisison is not required if `{true | role id}` is not specified*
