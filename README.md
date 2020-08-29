@@ -25,9 +25,10 @@ If the bot finds a comment from a whitelisted user, it proceeds to post it to th
 
 *{ } means optional and <> means required*
 
-| Name        | Description                                             | Usage                    | User Permissions |
-|-------------|---------------------------------------------------------|--------------------------|------------------|
-| Subscribe   | Adds the current channel to Datamine Updates            | subscribe {role id}      | MANAGE_GUILD     |
-| Unsubscribe | Removes the current channel from Datamine Updates       | unsubscribe              | MANAGE_GUILD     |
-| Latest      | Sends the latest Datamine Update to the current channel | latest {true \| role id} | MENTION_EVERYONE |
-| Set Role    | Sets the role to ping for Datamine Updates              | setrole \<role id\>      | MANAGE_GUILD     |
+| Name        | Description                                             | Usage                    | User Permissions  |
+|-------------|---------------------------------------------------------|--------------------------|-------------------|
+| Subscribe   | Adds the current channel to Datamine Updates            | subscribe {role id}      | MANAGE_GUILD      |
+| Unsubscribe | Removes the current channel from Datamine Updates       | unsubscribe              | MANAGE_GUILD      |
+| Latest      | Sends the latest Datamine Update to the current channel | latest {true \| role id} | \*MENTION_EVERYONE|
+| Set Role    | Sets the role to ping for Datamine Updates              | setrole \<role id\>      | MANAGE_GUILD      |
+*\*The MENTION_EVERYONE permisison is not required if `{true \| role id}` is not specified*
