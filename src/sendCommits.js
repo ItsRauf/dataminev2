@@ -33,6 +33,7 @@ module.exports = async function sendCommits(DatamineBot) {
        */
       const channel = s.channels.resolve(server.channel);
       getLatestCommit().then(async (commit) => {
+        // console.log(commit);
         if (!server.lastSentComment) {
           await Server.findByIdAndUpdate(server._id, {
             lastSentComment: commit._id,
@@ -47,6 +48,7 @@ module.exports = async function sendCommits(DatamineBot) {
             await Server.findByIdAndUpdate(server._id, {
               lastSentComment: commit._id,
             });
+            const test = await Server.findById(server._id);
             await sendEmbed(channel, commit, server.roleid);
           }
         }

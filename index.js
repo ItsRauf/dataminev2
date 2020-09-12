@@ -14,8 +14,8 @@ DatamineBot.on("ready", async () => {
     type: "WATCHING",
   });
   await sendCommits(DatamineBot);
-  await CommitHandler();
-  setInterval(CommitHandler, 60000);
+  // await CommitHandler();
+  // setInterval(CommitHandler, 60000);
 });
 
 DatamineBot.login(process.env.TOKEN);
