@@ -2,7 +2,7 @@ const { Client, TextChannel } = require("discord.js");
 const getLatestCommit = require("./getLatestCommit");
 const Commit = require("./models/Commit");
 const Server = require("./models/Server");
-const sendEmbed = require("./sendEmbed");
+const sendSingleComment = require("./sendSingleComment");
 
 /**
  * Parses build number from title
@@ -33,18 +33,14 @@ module.exports = async function sendCommits(DatamineBot) {
       const channel = s.channels.resolve(server.channel);
       getLatestCommit().then(async (commit) => {
         if (!server.lastSentComment) {
-          await sendEmbed(channel, commit, server.roleid);
-        }
-        if (commit._id > server.lastSentComment) {
+          return await sendSingleComment(DatamineBot, commit);
+        } else if (commit._id > server.lastSentComment) {
           const commits = await Commit.find({
             _id: { $gt: server.lastSentComment },
           }).sort("buildNumber");
 
           for (const commit of commits) {
-            await Server.findByIdAndUpdate(server._id, {
-              lastSentComment: commit._id,
-            });
-            await sendEmbed(channel, commit, server.roleid);
+            await sendSingleComment(DatamineBot, commit);
           }
         }
       });

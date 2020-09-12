@@ -10,7 +10,8 @@ const crosspost = require("./crosspost");
 module.exports = function sendEmbed(channel, commit, roleid) {
   try {
     channel
-      .send(roleid ? `<@&${roleid}>` : "", ConstructEmbed(commit))
+      // .send(roleid ? `<@&${roleid}>` : "", ConstructEmbed(commit))
+      .send(ConstructEmbed(commit))
       .then(async (msg) => {
         await crosspost(msg);
         if (commit.images && commit.images.length > 0) {

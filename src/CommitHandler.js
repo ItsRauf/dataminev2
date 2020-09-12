@@ -164,8 +164,8 @@ module.exports = async function commitHandler() {
           );
           newComment.images = images.map((image) => image.new);
         }
-        Commit.updateOne(
-          { _id: foundCommit._id },
+        Commit.findByIdAndUpdate(
+          foundCommit._id,
           { $push: { comments: newComment } },
           (err) => {
             if (err) return console.error(err);
