@@ -173,6 +173,7 @@ module.exports = async function commitHandler() {
               `Stored comment ${comment.id} for Commit ${foundCommit._id}`
             );
             sendSingleComment(DatamineBot, {
+              _id: foundCommit._id,
               title: foundCommit.title,
               ...newComment,
             });

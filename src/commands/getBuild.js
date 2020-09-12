@@ -9,7 +9,7 @@ const Commit = require("../models/Commit");
  * @param {String[]} args
  * @param {Client} DatamineBot
  */
-module.exports = function latest(msg, args, _DatamineBot) {
+module.exports = function getBuild(msg, args, _DatamineBot) {
   Commit.findOne({ buildNumber: args[0] }, (err, commit) => {
     if (err) return msg.reply(`\`\`\`\n${err}\n\`\`\``);
     if (commit) sendEmbed(msg.channel, commit);

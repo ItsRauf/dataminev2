@@ -23,63 +23,31 @@ function parseBuildNumber(title) {
  * @param {Client} DatamineBot
  */
 module.exports = async function sendCommits(DatamineBot) {
-  try {
-    Server.find().then((servers) => {
-      servers.forEach(async (server) => {
-        const s = await DatamineBot.guilds.resolve(server._id);
-        if (s && s.channels) {
-          /**
-           * @type {TextChannel}
-           */
-          const channel = s.channels.resolve(server.channel);
-          const messages = Array.from(
-            (await channel.messages.fetch({ limit: 100 })).values()
-          );
-          if (Array.isArray(messages)) {
-            const messagesFromDatamine = messages.filter(
-              (message) => message.author.id === DatamineBot.user.id
-            );
-            const messagesWithEmbed = messagesFromDatamine.filter(
-              (message) => message.embeds.length > 0
-            );
-            const DatamineEmbeds = messagesWithEmbed.filter((message) => {
-              const regex = /(Canary\sbuild:\s([0-9]*))/;
-              if (regex.test(message.embeds[0].title)) return message;
+  const servers = await Server.find();
+  for (const server of servers) {
+    const s = await DatamineBot.guilds.resolve(server._id);
+    if (s && s.channels) {
+      /**
+       * @type {TextChannel}
+       */
+      const channel = s.channels.resolve(server.channel);
+      getLatestCommit().then(async (commit) => {
+        if (!server.lastSentComment) {
+          await sendEmbed(channel, commit, server.roleid);
+        }
+        if (commit._id > server.lastSentComment) {
+          const commits = await Commit.find({
+            _id: { $gt: server.lastSentComment },
+          }).sort("buildNumber");
+
+          for (const commit of commits) {
+            await Server.findByIdAndUpdate(server._id, {
+              lastSentComment: commit._id,
             });
-            const message = DatamineEmbeds[0];
-            getLatestCommit().then((commit) => {
-              if (message) {
-                if (message.embeds.length <= 0) {
-                  sendEmbed(message.channel, commit, server.roleid);
-                } else if (message.embeds[0].title !== commit.title) {
-                  Commit.find()
-                    .sort("-buildNumber")
-                    .then((commits) => {
-                      commits
-                        .filter(
-                          (commit) =>
-                            parseBuildNumber(message.embeds[0].title) <
-                            commit.buildNumber
-                        )
-                        .sort((a, b) => a.buildNumber - b.buildNumber)
-                        .forEach(async (commit) => {
-                          await sendEmbed(
-                            message.channel,
-                            commit,
-                            server.roleid
-                          );
-                        });
-                    });
-                }
-              } else {
-                sendEmbed(channel, commit, server.roleid);
-              }
-            });
+            await sendEmbed(channel, commit, server.roleid);
           }
         }
       });
-    });
-  } catch (error) {
-    console.error(error);
+    }
   }
 };

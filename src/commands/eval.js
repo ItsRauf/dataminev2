@@ -1,6 +1,7 @@
 const { Client, Message, MessageEmbed } = require("discord.js");
 const util = require("util");
 const vm = require("vm");
+const Server = require("../models/Server");
 
 /**
  * Evaluates given code
@@ -31,6 +32,7 @@ module.exports = async function evaluate(msg, args, DatamineBot) {
       DatamineBot,
       MessageEmbed,
       msg,
+      Server,
     });
 
     let func = evaled;

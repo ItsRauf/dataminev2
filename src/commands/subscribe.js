@@ -1,5 +1,6 @@
 const { Client, Message, MessageEmbed } = require("discord.js");
 const Server = require("../models/Server");
+const getLatestCommit = require("../getLatestCommit");
 
 const AlreadySubscribed = new MessageEmbed({
   title: "Datamine Updates",
@@ -22,7 +23,7 @@ const Welcome = new MessageEmbed({
  */
 module.exports = function subscribe(msg, args, _DatamineBot) {
   if (msg.member.hasPermission("MANAGE_GUILD")) {
-    return Server.findOne({ _id: msg.guild.id }, (err, doc) => {
+    return Server.findOne({ _id: msg.guild.id }, async (err, doc) => {
       if (err) return console.error(err);
       if (doc) {
         msg.channel.send(AlreadySubscribed);
@@ -31,6 +32,7 @@ module.exports = function subscribe(msg, args, _DatamineBot) {
           _id: msg.guild.id,
           channel: msg.channel.id,
           roleid: args ? args[0] : "",
+          lastSentComment: (await getLatestCommit())._id,
         }).then(() => {
           msg.channel.send(Welcome).then(() => {
             const latest = require("./latest");

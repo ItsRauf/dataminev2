@@ -13,6 +13,10 @@ const ServerSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+  lastSentComment: {
+    type: Number,
+    required: false,
+  },
 });
 
 const Server = mongoose.model("Servers", ServerSchema);
