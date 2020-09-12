@@ -20,6 +20,11 @@ module.exports = function latest(
   if (deleteMessage || args[0] === "true") msg.delete({ timeout: 1000 });
   getLatestCommit().then(async (commit) => {
     const server = await Server.findById(msg.guild.id);
+    if (args[0] === "true")
+      await Server.updateOne(
+        { _id: server._id },
+        { lastSentComment: commit._id }
+      );
     const role = msg.guild.roles.resolve(
       args[0] === "true" ? server.roleid : args[0]
     );
