@@ -62,8 +62,12 @@ module.exports = async function sendCommits(DatamineBot) {
                             commit.buildNumber
                         )
                         .sort((a, b) => a.buildNumber - b.buildNumber)
-                        .forEach((commit) => {
-                          sendEmbed(message.channel, commit, server.roleid);
+                        .forEach(async (commit) => {
+                          await sendEmbed(
+                            message.channel,
+                            commit,
+                            server.roleid
+                          );
                         });
                     });
                 }
