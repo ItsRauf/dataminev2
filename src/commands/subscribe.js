@@ -30,11 +30,11 @@ module.exports = function subscribe(msg, args, _DatamineBot) {
         Server.create({
           _id: msg.guild.id,
           channel: msg.channel.id,
-          roleid: args[0],
+          roleid: args ? args[0] : "",
         }).then(() => {
           msg.channel.send(Welcome).then(() => {
             const latest = require("./latest");
-            latest(msg, undefined, undefined, true);
+            latest(msg, ["true"], undefined, true);
           });
         });
       }

@@ -1,4 +1,4 @@
-const { Client, Message } = require("discord.js")
+const { Client, Message } = require("discord.js");
 const commands = require("./commands");
 
 /**
@@ -11,8 +11,8 @@ const commands = require("./commands");
 function parseArgs(prefix, content) {
   const parsed = content.split(prefix)[1].split(" ");
   const cmd = parsed[0];
-  parsed.shift()
-  return { cmd, args: parsed }
+  parsed.shift();
+  return { cmd, args: parsed };
 }
 
 /**
@@ -22,11 +22,11 @@ function parseArgs(prefix, content) {
  * @param {Message} msg
  */
 module.exports = (DatamineBot, msg) => {
-  const prefix = "d!"
+  const prefix = "d!!";
   if (msg.content.startsWith(prefix)) {
-    const { args, cmd } = parseArgs(prefix, msg.content)
+    const { args, cmd } = parseArgs(prefix, msg.content);
     if (commands[cmd]) {
       commands[cmd](msg, args, DatamineBot);
     }
   }
-}
+};

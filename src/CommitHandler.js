@@ -1,6 +1,8 @@
 const axios = require("axios").default;
 const Commit = require("./models/Commit");
 const whitelist = require("./whitelist.json");
+const sendSingleComment = require("./sendSingleComment");
+const DatamineBot = require("./bot");
 
 /**
  * Finds commit in database
@@ -65,19 +67,20 @@ module.exports = async function commitHandler() {
     const title = commit.commit.message;
     const buildNumber = parseBuildNumber(title);
     const foundCommit = await findCommit(buildNumber);
+    /**
+     * @type {{data: any[]}}
+     */
+    const githubComments = await axios.get(commit.comments_url, RequestOptions);
+    const whitelistedComments = githubComments.data.filter((comment) =>
+      whitelist.includes(comment.user.id)
+    );
     if (!foundCommit) {
-      /**
-       * @type {{data: any[]}}
-       */
-      const comments = await axios.get(commit.comments_url, RequestOptions);
-      // const commentsByTiemen = comments.data.filter((comment) => comment.user.login === "ThaTiemsz");
-      // const comment = commentsByTiemen[0];
-      const whitelistedComments = comments.data.filter((comment) =>
-        whitelist.includes(comment.user.id)
-      );
       const comment = whitelistedComments[0];
       if (comment) {
+        whitelistedComments.shift();
         const preCommit = {
+          _id: comment.id,
+          timestamp: comment.created_at,
           buildNumber,
           title,
           description: comment.body,
@@ -88,6 +91,30 @@ module.exports = async function commitHandler() {
             avatarURL: comment.user.avatar_url,
             url: comment.user.html_url,
           },
+          images: [],
+          comments: whitelistedComments.map((comment) => {
+            const newComment = {
+              id: comment.id,
+              timestamp: comment.created_at,
+              description: comment.body,
+              url: comment.html_url,
+              user: {
+                username: comment.user.login,
+                id: comment.user.id,
+                avatarURL: comment.user.avatar_url,
+                url: comment.user.html_url,
+              },
+              images: [],
+            };
+            const images = parseImages(newComment.description);
+            if (Array.isArray(images)) {
+              images.forEach((image) =>
+                newComment.description.replace(image.old, "")
+              );
+              newComment.images = images.map((image) => image.new);
+            }
+            return newComment;
+          }),
         };
         const images = parseImages(preCommit.description);
         if (Array.isArray(images)) {
@@ -99,6 +126,7 @@ module.exports = async function commitHandler() {
         Commit.create(preCommit)
           .then((doc) => {
             console.log(`Stored Commit for Build ${doc.buildNumber}`);
+            sendSingleComment(DatamineBot, doc);
           })
           .catch((err) =>
             console.log(
@@ -107,6 +135,50 @@ module.exports = async function commitHandler() {
             )
           );
       }
+    } else {
+      /**
+       * @type {any[]}
+       */
+      const commitComments = foundCommit.comments;
+      whitelistedComments.forEach((comment) => {
+        // console.log(comment.id, foundCommit._id === comment.id);
+        if (foundCommit._id === comment.id) return;
+        if (commitComments.find((c) => c.id === comment.id)) return;
+        const newComment = {
+          id: comment.id,
+          timestamp: comment.created_at,
+          description: comment.body,
+          url: comment.html_url,
+          user: {
+            username: comment.user.login,
+            id: comment.user.id,
+            avatarURL: comment.user.avatar_url,
+            url: comment.user.html_url,
+          },
+          images: [],
+        };
+        const images = parseImages(newComment.description);
+        if (Array.isArray(images)) {
+          images.forEach((image) =>
+            newComment.description.replace(image.old, "")
+          );
+          newComment.images = images.map((image) => image.new);
+        }
+        Commit.updateOne(
+          { _id: foundCommit._id },
+          { $push: { comments: newComment } },
+          (err) => {
+            if (err) return console.error(err);
+            console.log(
+              `Stored comment ${comment.id} for Commit ${foundCommit._id}`
+            );
+            sendSingleComment(DatamineBot, {
+              title: foundCommit.title,
+              ...newComment,
+            });
+          }
+        );
+      });
     }
   });
 };

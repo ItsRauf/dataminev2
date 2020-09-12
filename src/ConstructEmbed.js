@@ -11,6 +11,7 @@ const { MessageEmbed } = require("discord.js");
  * @param {String} commit.user.username
  * @param {String} commit.user.avatarURL
  * @param {String} commit.user.url
+ * @param {String} commit.timestamp
  * @returns {MessageEmbed}
  */
 module.exports = function ConstructEmbed(commit) {
@@ -26,5 +27,5 @@ module.exports = function ConstructEmbed(commit) {
       icon_url: commit.user.avatarURL,
       url: commit.user.url,
     },
-  }).setTimestamp();
+  }).setTimestamp(new Date(commit.timestamp));
 };

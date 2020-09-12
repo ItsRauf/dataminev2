@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const CommitSchema = new mongoose.Schema({
+  _id: {
+    type: Number,
+  },
   buildNumber: {
     type: String,
     required: true,
@@ -26,6 +29,13 @@ const CommitSchema = new mongoose.Schema({
     id: { type: Number, required: true },
     avatarURL: { type: String, required: true },
     url: { type: String, required: true },
+  },
+  comments: {
+    type: Array,
+  },
+  timestamp: {
+    type: String,
+    required: true,
   },
 });
 

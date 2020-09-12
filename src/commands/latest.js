@@ -1,7 +1,7 @@
 const { Client, Message } = require("discord.js");
 const getLatestCommit = require("../getLatestCommit");
-const ConstructEmbed = require("../ConstructEmbed");
 const Server = require("../models/Server");
+const sendEmbed = require("../sendEmbed");
 
 /**
  * Fetches latest datamine commit
@@ -25,21 +25,6 @@ module.exports = function latest(
     );
     const memberCanPingRole =
       msg.member.hasPermission("MENTION_EVERYONE") || role.mentionable;
-    msg.channel
-      .send(role && memberCanPingRole ? `${role}` : "", ConstructEmbed(commit))
-      .then(() => {
-        if (commit.images.length > 0) {
-          if (commit.images.length <= 5) {
-            msg.channel.send(commit.images.join("\n"));
-          } else {
-            const length = Math.ceil(commit.images.length / 5);
-            for (let index = 0; index < length; index++) {
-              msg.channel.send(
-                commit.images.splice(index, (index + 1) * 5).join("\n")
-              );
-            }
-          }
-        }
-      });
+    sendEmbed(msg.channel, commit, role && memberCanPingRole ? `${role}` : "");
   });
 };

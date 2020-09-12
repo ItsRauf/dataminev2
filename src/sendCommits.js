@@ -1,8 +1,8 @@
 const { Client, TextChannel } = require("discord.js");
-const ConstructEmbed = require("./ConstructEmbed");
 const getLatestCommit = require("./getLatestCommit");
 const Commit = require("./models/Commit");
 const Server = require("./models/Server");
+const sendEmbed = require("./sendEmbed");
 
 /**
  * Parses build number from title
@@ -33,7 +33,6 @@ module.exports = async function sendCommits(DatamineBot) {
            */
           const channel = s.channels.resolve(server.channel);
           const messages = Array.from(
-            // (await channel.fetchMessages({ limit: 100 })).values()
             (await channel.messages.fetch({ limit: 100 })).values()
           );
           if (Array.isArray(messages)) {
@@ -51,54 +50,7 @@ module.exports = async function sendCommits(DatamineBot) {
             getLatestCommit().then((commit) => {
               if (message) {
                 if (message.embeds.length <= 0) {
-                  message.channel
-                    .send(
-                      server.roleid ? `<@&${server.roleid}>` : "",
-                      ConstructEmbed(commit)
-                    )
-                    .then((msg) => {
-                      if (msg.channel.type === "news") {
-                        msg.client.api
-                          .channels(msg.channel.id)
-                          .messages(msg.id)
-                          .crosspost()
-                          .post();
-                      }
-                      if (commit.images.length > 0) {
-                        if (commit.images.length <= 5) {
-                          message.channel
-                            .send(commit.images.join("\n"))
-                            .then((msg) => {
-                              if (msg.channel.type === "news") {
-                                msg.client.api
-                                  .channels(msg.channel.id)
-                                  .messages(msg.id)
-                                  .crosspost()
-                                  .post();
-                              }
-                            });
-                        } else {
-                          const length = Math.ceil(commit.images.length / 5);
-                          for (let index = 0; index < length; index++) {
-                            message.channel
-                              .send(
-                                commit.images
-                                  .splice(index, (index + 1) * 5)
-                                  .join("\n")
-                              )
-                              .then((msg) => {
-                                if (msg.channel.type === "news") {
-                                  msg.client.api
-                                    .channels(msg.channel.id)
-                                    .messages(msg.id)
-                                    .crosspost()
-                                    .post();
-                                }
-                              });
-                          }
-                        }
-                      }
-                    });
+                  sendEmbed(message.channel, commit, server.roleid);
                 } else if (message.embeds[0].title !== commit.title) {
                   Commit.find()
                     .sort("-buildNumber")
@@ -111,108 +63,12 @@ module.exports = async function sendCommits(DatamineBot) {
                         )
                         .sort((a, b) => a.buildNumber - b.buildNumber)
                         .forEach((commit) => {
-                          message.channel
-                            .send(
-                              server.roleid ? `<@&${server.roleid}>` : "",
-                              ConstructEmbed(commit)
-                            )
-                            .then(async (msg) => {
-                              if (msg.channel.type === "news") {
-                                msg.client.api
-                                  .channels(msg.channel.id)
-                                  .messages(msg.id)
-                                  .crosspost()
-                                  .post();
-                              }
-                              if (commit.images.length > 0) {
-                                if (commit.images.length <= 5) {
-                                  await message.channel
-                                    .send(commit.images.join("\n"))
-                                    .then((msg) => {
-                                      if (msg.channel.type === "news") {
-                                        msg.client.api
-                                          .channels(msg.channel.id)
-                                          .messages(msg.id)
-                                          .crosspost()
-                                          .post();
-                                      }
-                                    });
-                                } else {
-                                  const length = Math.ceil(
-                                    commit.images.length / 5
-                                  );
-                                  for (let index = 0; index < length; index++) {
-                                    await message.channel
-                                      .send(
-                                        commit.images
-                                          .splice(index, (index + 1) * 5)
-                                          .join("\n")
-                                      )
-                                      .then((msg) => {
-                                        if (msg.channel.type === "news") {
-                                          msg.client.api
-                                            .channels(msg.channel.id)
-                                            .messages(msg.id)
-                                            .crosspost()
-                                            .post();
-                                        }
-                                      });
-                                  }
-                                }
-                              }
-                            });
+                          sendEmbed(message.channel, commit, server.roleid);
                         });
                     });
                 }
               } else {
-                channel
-                  .send(
-                    server.roleid ? `<@&${server.roleid}>` : "",
-                    ConstructEmbed(commit)
-                  )
-                  .then((msg) => {
-                    if (msg.channel.type === "news") {
-                      msg.client.api
-                        .channels(msg.channel.id)
-                        .messages(msg.id)
-                        .crosspost()
-                        .post();
-                    }
-                    if (commit.images.length > 0) {
-                      if (commit.images.length <= 5) {
-                        message.channel
-                          .send(commit.images.join("\n"))
-                          .then((msg) => {
-                            if (msg.channel.type === "news") {
-                              msg.client.api
-                                .channels(msg.channel.id)
-                                .messages(msg.id)
-                                .crosspost()
-                                .post();
-                            }
-                          });
-                      } else {
-                        const length = Math.ceil(commit.images.length / 5);
-                        for (let index = 0; index < length; index++) {
-                          message.channel
-                            .send(
-                              commit.images
-                                .splice(index, (index + 1) * 5)
-                                .join("\n")
-                            )
-                            .then((msg) => {
-                              if (msg.channel.type === "news") {
-                                msg.client.api
-                                  .channels(msg.channel.id)
-                                  .messages(msg.id)
-                                  .crosspost()
-                                  .post();
-                              }
-                            });
-                        }
-                      }
-                    }
-                  });
+                sendEmbed(channel, commit, server.roleid);
               }
             });
           }
