@@ -22,7 +22,7 @@ function parseArgs(prefix, content) {
  * @param {Message} msg
  */
 module.exports = (DatamineBot, msg) => {
-  const prefix = "d!!";
+  const prefix = "d!";
   if (msg.content.startsWith(prefix)) {
     const { args, cmd } = parseArgs(prefix, msg.content);
     if (commands[cmd]) {
