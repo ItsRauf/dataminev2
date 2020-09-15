@@ -7,10 +7,10 @@ const DatamineBot = require("./bot");
 /**
  * Finds commit in database
  *
- * @param {String} buildNumber
+ * @param {String} id
  */
-function findCommit(buildNumber) {
-  return Commit.findOne({ buildNumber });
+function findCommit(id) {
+  return Commit.findById(id);
 }
 
 /**
@@ -66,7 +66,6 @@ module.exports = async function commitHandler() {
   commitsWithComments.forEach(async (commit) => {
     const title = commit.commit.message;
     const buildNumber = parseBuildNumber(title);
-    const foundCommit = await findCommit(buildNumber);
     /**
      * @type {{data: any[]}}
      */
@@ -74,9 +73,12 @@ module.exports = async function commitHandler() {
     const whitelistedComments = githubComments.data.filter((comment) =>
       whitelist.includes(comment.user.id)
     );
+    if (whitelistedComments.length === 0) return;
+    const foundCommit = await findCommit(whitelistedComments[0].id);
     if (!foundCommit) {
       const comment = whitelistedComments[0];
       if (comment) {
+        console.log(comment.id);
         whitelistedComments.shift();
         const preCommit = {
           _id: comment.id,

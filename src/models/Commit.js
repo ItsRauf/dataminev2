@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const CommitSchema = new mongoose.Schema({
   _id: {
     type: Number,
+    required: true,
   },
   buildNumber: {
     type: String,
