@@ -8,7 +8,7 @@ If the bot finds a comment from a whitelisted user, it proceeds to post it to th
 
 ## How to use the bot
 * Invite the bot using https://discord.com/oauth2/authorize?client_id=507415798189654016&scope=bot&permissions=190464
-* send `d!subcribe` in the channel you want the bot to send updates in. (use `d!subscribe {role id}` if you want it to mention a role)
+* send `d!subscribe` in the channel you want the bot to send updates in. (use `d!subscribe {role id}` if you want it to mention a role)
 * watch it work its magic
 
 ## How to whitelist a user
