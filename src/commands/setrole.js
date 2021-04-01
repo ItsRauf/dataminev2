@@ -22,6 +22,8 @@ module.exports = async function setrole(msg, args, _DatamineBot) {
           );
         }
       );
+    } else {
+      msg.channel.send(`\`${args[0]}\` is an invalid role id.`);
     }
   }
 };

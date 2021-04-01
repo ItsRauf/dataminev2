@@ -8,6 +8,11 @@ const AlreadySubscribed = new MessageEmbed({
     "This channel is already subscribed! Use `d!unsubscribe` to stop receiving updates.",
 }).setTimestamp();
 
+const InvalidRole = new MessageEmbed({
+  title: "Datamine Updates",
+  description: "The specified role id is not a role.",
+}).setTimestamp();
+
 const Welcome = new MessageEmbed({
   title: "Datamine Updates",
   description:
@@ -21,17 +26,21 @@ const Welcome = new MessageEmbed({
  * @param {String[]} args
  * @param {Client} DatamineBot
  */
-module.exports = function subscribe(msg, args, _DatamineBot) {
+module.exports = async function subscribe(msg, args, _DatamineBot) {
   if (msg.member.hasPermission("MANAGE_GUILD")) {
     return Server.findOne({ _id: msg.guild.id }, async (err, doc) => {
       if (err) return console.error(err);
       if (doc) {
         msg.channel.send(AlreadySubscribed);
       } else {
+        const role = await msg.guild.roles.fetch(args[0]);
+        if (!role && args[0]) {
+          return msg.channel.send(InvalidRole);
+        }
         Server.create({
           _id: msg.guild.id,
           channel: msg.channel.id,
-          roleid: args ? args[0] : "",
+          roleid: role ? role.id : "",
           lastSentComment: (await getLatestCommit())._id,
         }).then(() => {
           msg.channel.send(Welcome).then(() => {

@@ -9,10 +9,16 @@ const getLatestCommit = require("./src/getLatestCommit");
 DatamineBot.on("ready", async () => {
   Database();
   console.log("Connected to Discord.");
-  DatamineBot.user.setActivity({
-    name: `${(await getLatestCommit()).title.substr(19, 20)}.js`,
-    type: "WATCHING",
-  });
+  try {
+    DatamineBot.user.setActivity({
+      name: `${
+        (await getLatestCommit()).title.split("-")[1].trim().split(" ")[0]
+      }.js`,
+      type: "WATCHING",
+    });
+  } catch (err) {
+    console.error(err);
+  }
   await sendCommits(DatamineBot);
   await CommitHandler();
   setInterval(CommitHandler, 60000);
@@ -20,5 +26,5 @@ DatamineBot.on("ready", async () => {
 
 DatamineBot.login(process.env.TOKEN);
 
-process.on("uncaughtException", console.log);
-process.on("unhandledRejection", console.log);
+process.on("uncaughtException", console.error);
+process.on("unhandledRejection", console.error);
