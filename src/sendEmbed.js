@@ -1,5 +1,4 @@
 const ConstructEmbed = require("./ConstructEmbed");
-const crosspost = require("./crosspost");
 
 /**
  * Sends Embed
@@ -7,17 +6,22 @@ const crosspost = require("./crosspost");
  * @param {import("discord.js").TextChannel} channel
  * @param {import("mongoose").Document} commit
  */
-module.exports = function sendEmbed(channel, commit, roleid) {
+module.exports = async function sendEmbed(channel, commit, roleid) {
   try {
-    channel
+    if (!channel) return;
+    await channel
       .send(roleid ? `<@&${roleid}>` : "", ConstructEmbed(commit))
       // .send(ConstructEmbed(commit))
       .then(async (msg) => {
-        await crosspost(msg);
+        if (msg.crosspostable) {
+          await msg.crosspost();
+        }
         if (commit.images && commit.images.length > 0) {
           if (commit.images.length <= 5) {
             await channel.send(commit.images.join("\n")).then(async (msg) => {
-              await crosspost(msg);
+              if (msg.crosspostable) {
+                await msg.crosspost();
+              }
             });
           } else {
             const length = Math.ceil(commit.images.length / 5);
@@ -25,7 +29,9 @@ module.exports = function sendEmbed(channel, commit, roleid) {
               await channel
                 .send(commit.images.splice(index, (index + 1) * 5).join("\n"))
                 .then(async (msg) => {
-                  await crosspost(msg);
+                  if (msg.crosspostable) {
+                    await msg.crosspost();
+                  }
                 });
             }
           }

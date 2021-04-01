@@ -2,21 +2,7 @@ const { Client, TextChannel } = require("discord.js");
 const getLatestCommit = require("./getLatestCommit");
 const Commit = require("./models/Commit");
 const Server = require("./models/Server");
-const sendSingleComment = require("./sendSingleComment");
 const sendEmbed = require("./sendEmbed");
-
-/**
- * Parses build number from title
- *
- * @param {String} title
- * @returns Build Number
- */
-function parseBuildNumber(title) {
-  const regex = /(Canary\sbuild:\s([0-9]*))/;
-  if (regex.test(title)) {
-    return regex.exec(title)[2];
-  }
-}
 
 /**
  * Sends commits
@@ -48,7 +34,6 @@ module.exports = async function sendCommits(DatamineBot) {
             await Server.findByIdAndUpdate(server._id, {
               lastSentComment: commit._id,
             });
-            const test = await Server.findById(server._id);
             await sendEmbed(channel, commit, server.roleid);
           }
         }
