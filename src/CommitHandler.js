@@ -57,7 +57,7 @@ module.exports = async function commitHandler() {
    * @type {{data: any[]}}
    */
   const commits = await axios.get(
-    "https://api.github.com/repos/DJScias/Discord-Datamining/commits",
+    "https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits",
     RequestOptions
   );
   const commitsWithComments = commits.data.filter(
