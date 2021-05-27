@@ -114,7 +114,7 @@ function transformCommentDataShape(comment, { title, buildNumber }) {
 module.exports = async function commitHandler() {
   const commits = await getCommitsWithComments();
   for await (const [commit, comments] of commits.map(
-    getWhitelistedCommentsOfCommit
+    getCommentsWithImagesOfCommit
   )) {
     const [firstComment, ...subComments] = comments.map((comment) =>
       transformCommentDataShape(comment, {
