@@ -1,187 +1,165 @@
 const axios = require("axios").default;
 const Commit = require("./models/Commit");
-const whitelist = require("./whitelist.json");
 const sendSingleComment = require("./sendSingleComment");
 const DatamineBot = require("./bot");
 
 /**
- * Finds commit in database
+ * Parses Discord Build Number from Commit Title
  *
- * @param {String} id
- */
-function findCommit(id) {
-  return Commit.findById(id);
-}
-
-/**
- * Parses build number from title
- *
- * @param {String} title
- * @returns Build Number
+ * @param {string} title
  */
 function parseBuildNumber(title) {
   const regex = /(Canary\sbuild:\s([0-9]*))/;
-  if (regex.test(title)) {
-    return regex.exec(title)[2];
-  }
+  return regex.exec(title)[2];
 }
 
-/**
- * Parses images from comment body
- *
- * @param {String} data
- */
-function parseImages(data) {
-  const imageRegex = /!\[.*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/gm;
-  const imageRegexTwo = /!\[.*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/m;
-  const images = data.match(imageRegex);
-  if (Array.isArray(images)) {
-    const parsedImages = images.map((image) => {
-      return {
-        old: image,
-        new: imageRegexTwo.exec(image)[1],
-      };
-    });
-    return parsedImages;
-  }
-}
+const RequestOptions = {
+  auth: {
+    username: process.env.USERNAME,
+    password: process.env.PASSWORD,
+  },
+};
 
-module.exports = async function commitHandler() {
-  const RequestOptions = {
-    auth: {
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
-    },
-  };
-  /**
-   * @type {{data: any[]}}
-   */
-  const commits = await axios.get(
+async function getCommitsWithComments() {
+  /** @type {{data: any[]}} */
+  const { data } = await axios.get(
     "https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits",
     RequestOptions
   );
-  const commitsWithComments = commits.data.filter(
-    (commit) => commit.commit.comment_count >= 1
-  );
-  commitsWithComments.forEach(async (commit) => {
-    const title = commit.commit.message;
-    const buildNumber = parseBuildNumber(title);
-    /**
-     * @type {{data: any[]}}
-     */
-    const githubComments = await axios.get(commit.comments_url, RequestOptions);
-    const whitelistedComments = githubComments.data.filter((comment) =>
-      whitelist.includes(comment.user.id)
+
+  return data
+    .filter((commit) => commit.commit.comment_count >= 1)
+    .map((commit) => {
+      return {
+        ...commit,
+        commit: {
+          ...commit.commit,
+          buildNumber: parseBuildNumber(commit.commit.message),
+        },
+      };
+    })
+    .sort((a, b) => a.commit.buildNumber - b.commit.buildNumber);
+}
+
+/** @return {{old: string, new: string}[]} */
+function parseImagesFromComment(comment) {
+  const images = [];
+  const markdownImageRegexs = [
+    /!\[.*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/gm,
+    /!\[.*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/m,
+  ];
+  const markdownImages = comment.body.match(markdownImageRegexs[0]);
+  const htmlImageRegexs = [
+    /<img\s+[^>]*src="([^"]*)"[^>]*>/gm,
+    /<img\s+[^>]*src="([^"]*)"[^>]*>/m,
+  ];
+  const htmlImages = comment.body.match(htmlImageRegexs[0]);
+  if (Array.isArray(markdownImages)) {
+    images.push(
+      ...markdownImages.map((image) => ({
+        old: image,
+        new: markdownImageRegexs[1].exec(image)[1],
+      }))
     );
-    if (whitelistedComments.length === 0) return;
-    const foundCommit = await findCommit(whitelistedComments[0].id);
+  }
+  if (Array.isArray(htmlImages)) {
+    images.push(
+      ...htmlImages.map((image) => ({
+        old: image,
+        new: htmlImageRegexs[1].exec(image)[1],
+      }))
+    );
+  }
+  return images;
+}
+
+/** @return {[any, any[]]} */
+async function getCommentsWithImagesOfCommit(commit) {
+  /** @type {{data: any[]}} */
+  const { data } = await axios.get(commit.comments_url, RequestOptions);
+  return [
+    commit.commit,
+    data.map((comment) => {
+      const images = parseImagesFromComment(comment);
+      images.forEach((image) => {
+        comment.body = comment.body.replace(image.old, "");
+      });
+      return {
+        ...comment,
+        images,
+      };
+    }),
+  ];
+}
+
+function transformCommentDataShape(comment, { title, buildNumber }) {
+  return {
+    _id: comment.id,
+    id: comment.id,
+    title,
+    buildNumber,
+    timestamp: comment.created_at,
+    url: comment.html_url,
+    description: comment.body,
+    user: {
+      username: comment.user.login,
+      id: comment.user.id,
+      avatarURL: comment.user.avatar_url,
+      url: comment.user.html_url,
+    },
+    images: comment.images.map((image) => image.new),
+  };
+}
+
+module.exports = async function commitHandler() {
+  const commits = await getCommitsWithComments();
+  for await (const [commit, comments] of commits.map(
+    getWhitelistedCommentsOfCommit
+  )) {
+    const [firstComment, ...subComments] = comments.map((comment) =>
+      transformCommentDataShape(comment, {
+        title: commit.message,
+        buildNumber: commit.buildNumber,
+      })
+    );
+    const foundCommit = await Commit.findById(firstComment.id);
     if (!foundCommit) {
-      const comment = whitelistedComments[0];
-      if (comment) {
-        console.log(comment.id);
-        whitelistedComments.shift();
-        const preCommit = {
-          _id: comment.id,
-          timestamp: comment.created_at,
-          buildNumber,
-          title,
-          description: comment.body,
-          url: comment.html_url,
-          user: {
-            username: comment.user.login,
-            id: comment.user.id,
-            avatarURL: comment.user.avatar_url,
-            url: comment.user.html_url,
-          },
-          images: [],
-          comments: whitelistedComments.map((comment) => {
-            const newComment = {
-              id: comment.id,
-              timestamp: comment.created_at,
-              description: comment.body,
-              url: comment.html_url,
-              user: {
-                username: comment.user.login,
-                id: comment.user.id,
-                avatarURL: comment.user.avatar_url,
-                url: comment.user.html_url,
-              },
-              images: [],
-            };
-            const images = parseImages(newComment.description);
-            if (Array.isArray(images)) {
-              images.forEach((image) =>
-                newComment.description.replace(image.old, "")
-              );
-              newComment.images = images.map((image) => image.new);
-            }
-            return newComment;
-          }),
-        };
-        const images = parseImages(preCommit.description);
-        if (Array.isArray(images)) {
-          images.forEach((image) =>
-            preCommit.description.replace(image.old, "")
-          );
-          preCommit.images = images.map((image) => image.new);
-        }
-        Commit.create(preCommit)
-          .then((doc) => {
-            console.log(`Stored Commit for Build ${doc.buildNumber}`);
-            sendSingleComment(DatamineBot, doc);
+      Commit.create({ ...firstComment, comments: subComments })
+        .then(async (doc) => {
+          console.log(`Stored Commit for Build ${doc.buildNumber}`);
+          await sendSingleComment(DatamineBot, doc);
+        })
+        .catch((err) =>
+          console.log(
+            `Error storing commit (${firstComment._id}) for build ${commit.buildNumber}`,
+            err.stack
+          )
+        );
+    } else {
+      for (const comment of subComments) {
+        if (foundCommit._id === comment.id) return;
+        if (foundCommit.comments.find((c) => c.id === comment.id)) return;
+        Commit.updateOne(
+          { _id: foundCommit._id },
+          { $push: { comments: comment } }
+        )
+          .then(async () => {
+            console.log(
+              `Stored comment ${comment.id} for Commit ${foundCommit._id}`
+            );
+            await sendSingleComment(DatamineBot, {
+              _id: foundCommit._id,
+              title: foundCommit.title,
+              ...comment,
+            });
           })
           .catch((err) =>
             console.log(
-              `Error storing commit for build ${buildNumber}`,
+              `Error storing comment (${command.id}) commit (${foundCommit._id}) for build ${foundCommit.buildNumber}`,
               err.stack
             )
           );
       }
-    } else {
-      /**
-       * @type {any[]}
-       */
-      const commitComments = foundCommit.comments;
-      whitelistedComments.forEach((comment) => {
-        // console.log(comment.id, foundCommit._id === comment.id);
-        if (foundCommit._id === comment.id) return;
-        if (commitComments.find((c) => c.id === comment.id)) return;
-        const newComment = {
-          id: comment.id,
-          timestamp: comment.created_at,
-          description: comment.body,
-          url: comment.html_url,
-          user: {
-            username: comment.user.login,
-            id: comment.user.id,
-            avatarURL: comment.user.avatar_url,
-            url: comment.user.html_url,
-          },
-          images: [],
-        };
-        const images = parseImages(newComment.description);
-        if (Array.isArray(images)) {
-          images.forEach((image) =>
-            newComment.description.replace(image.old, "")
-          );
-          newComment.images = images.map((image) => image.new);
-        }
-        Commit.findByIdAndUpdate(
-          foundCommit._id,
-          { $push: { comments: newComment } },
-          (err) => {
-            if (err) return console.error(err);
-            console.log(
-              `Stored comment ${comment.id} for Commit ${foundCommit._id}`
-            );
-            sendSingleComment(DatamineBot, {
-              _id: foundCommit._id,
-              title: foundCommit.title,
-              ...newComment,
-            });
-          }
-        );
-      });
     }
-  });
+  }
 };

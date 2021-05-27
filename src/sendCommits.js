@@ -19,7 +19,6 @@ module.exports = async function sendCommits(DatamineBot) {
        */
       const channel = s.channels.resolve(server.channel);
       getLatestCommit().then(async (commit) => {
-        // console.log(commit);
         if (!server.lastSentComment) {
           await Server.findByIdAndUpdate(server._id, {
             lastSentComment: commit._id,
@@ -28,7 +27,7 @@ module.exports = async function sendCommits(DatamineBot) {
         } else if (commit._id > server.lastSentComment) {
           const commits = await Commit.find({
             _id: { $gt: server.lastSentComment },
-          }).sort("buildNumber");
+          }).sort("_id");
 
           for (const commit of commits) {
             await Server.findByIdAndUpdate(server._id, {

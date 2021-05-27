@@ -14,21 +14,13 @@ If it finds a comment from an allowed user, it proceeds to post it to the subscr
 - Use the `d!subscribe` command in the channel you want the bot to send updates in. You can choose a role to be pinged each time using `d!subscribe [role ID]`
 - Let the magic happen!
 
-## How to add someone to the allowed users list?
-
-- Go to `https://api.github.com/users/[username]`
-- Copy their ID
-- Edit [src/whitelist.json](https://github.com/ItsRauf/dataminev2/blob/master/src/whitelist.json) and add their ID to the array
-- Create a pull request with the user's GitHub link as the title
-- Wait for the PR to be merged
-
 ---
 
 ## Commands
 
 **Prefix:** `d!`
 
-> _[ ] means optional and <> means required_
+> [ ] means optional and <> means required
 
 | Name          | Description                                             | Usage                      | User Permission    |
 | ------------- | ------------------------------------------------------- | -------------------------- | ------------------ |
@@ -37,4 +29,4 @@ If it finds a comment from an allowed user, it proceeds to post it to the subscr
 | d!latest      | Sends the latest Datamine Update to the current channel | `latest [true \| role ID]` | \*MENTION_EVERYONE |
 | d!setrole     | Sets the role to ping for Datamine Updates              | `setrole \<role ID\>`      | MANAGE_GUILD       |
 
-_\*The MENTION_EVERYONE permisison is not required if `[true | role ID]` is not specified_
+> \*The MENTION_EVERYONE permisison is not required if `[true | role ID]` is not specified
