@@ -113,6 +113,7 @@ function transformCommentDataShape(comment, { title, buildNumber }) {
 
 module.exports = async function commitHandler() {
   const commits = await getCommitsWithComments();
+  console.log(commits);
   for await (const [commit, comments] of commits.map(
     getCommentsWithImagesOfCommit
   )) {
@@ -122,7 +123,9 @@ module.exports = async function commitHandler() {
         buildNumber: commit.buildNumber,
       })
     );
+    // console.log("firstComment", firstComment);
     const foundCommit = await Commit.findById(firstComment.id);
+    // console.log("foundCommit", foundCommit._id);
     if (!foundCommit) {
       Commit.create({ ...firstComment, comments: subComments })
         .then(async (doc) => {
@@ -137,21 +140,7 @@ module.exports = async function commitHandler() {
         );
     } else {
       for (const comment of subComments) {
-        console.log(
-          "foundCommit._id",
-          foundCommit._id,
-          "comment.id",
-          comment.id
-        );
-        console.log(
-          "foundCommit._id === comment.id",
-          foundCommit._id === comment.id
-        );
         if (foundCommit._id === comment.id) return;
-        console.log(
-          "foundCommit.comments.find((c) => c.id === comment.id)",
-          foundCommit.comments.find((c) => c.id === comment.id)
-        );
         if (foundCommit.comments.find((c) => c.id === comment.id)) return;
         Commit.updateOne(
           { _id: foundCommit._id },
