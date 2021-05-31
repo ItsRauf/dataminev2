@@ -137,7 +137,21 @@ module.exports = async function commitHandler() {
         );
     } else {
       for (const comment of subComments) {
+        console.log(
+          "foundCommit._id",
+          foundCommit._id,
+          "comment.id",
+          comment.id
+        );
+        console.log(
+          "foundCommit._id === comment.id",
+          foundCommit._id === comment.id
+        );
         if (foundCommit._id === comment.id) return;
+        console.log(
+          "foundCommit.comments.find((c) => c.id === comment.id)",
+          foundCommit.comments.find((c) => c.id === comment.id)
+        );
         if (foundCommit.comments.find((c) => c.id === comment.id)) return;
         Commit.updateOne(
           { _id: foundCommit._id },

@@ -21,7 +21,7 @@ DatamineBot.on("ready", async () => {
   }
   await sendCommits(DatamineBot);
   await CommitHandler();
-  setInterval(CommitHandler, 60000);
+  setInterval(CommitHandler, 30000);
 });
 
 DatamineBot.login(process.env.TOKEN);
