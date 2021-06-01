@@ -16,14 +16,22 @@ module.exports = async function sendEmbed(channel, commit, roleid) {
     );
 
     if (commitMSG.crosspostable) {
-      commitMSG.crosspost();
+      try {
+        commitMSG.crosspost();
+      } catch (error) {
+        console.error(error.message);
+      }
     }
 
     if (commit.images && commit.images.length > 0) {
       if (commit.images.length <= 5) {
         const imgMSG = await channel.send(commit.images.join("\n"));
         if (imgMSG.crosspostable) {
-          imgMSG.crosspost();
+          try {
+            imgMSG.crosspost();
+          } catch (error) {
+            console.error(error.message);
+          }
         }
       }
     }
