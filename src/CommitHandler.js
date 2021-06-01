@@ -77,19 +77,20 @@ function parseImagesFromComment(comment) {
 async function getCommentsWithImagesOfCommit(commit) {
   /** @type {{data: any[]}} */
   const { data } = await axios.get(commit.comments_url, RequestOptions);
-  return [
-    commit.commit,
-    data.map((comment) => {
-      const images = parseImagesFromComment(comment);
+  // console.log("in map", commit.commit.buildNumber);
+  const comments = data.map((comment) => {
+    const images = parseImagesFromComment(comment);
+    if (images.length >= 1) {
       images.forEach((image) => {
         comment.body = comment.body.replace(image.old, "");
       });
-      return {
-        ...comment,
-        images,
-      };
-    }),
-  ];
+    }
+    return {
+      ...comment,
+      images,
+    };
+  });
+  return [commit.commit, comments];
 }
 
 function transformCommentDataShape(comment, { title, buildNumber }) {
@@ -113,55 +114,56 @@ function transformCommentDataShape(comment, { title, buildNumber }) {
 
 module.exports = async function commitHandler() {
   const commits = await getCommitsWithComments();
-  for await (const [commit, comments] of commits.map(
-    getCommentsWithImagesOfCommit
-  )) {
+  const commitsWithComments = await Promise.all(
+    commits.map(getCommentsWithImagesOfCommit)
+  );
+  commitsWithComments.forEach(async ([commit, comments]) => {
     const [firstComment, ...subComments] = comments.map((comment) =>
       transformCommentDataShape(comment, {
         title: commit.message,
         buildNumber: commit.buildNumber,
       })
     );
-    // console.log("firstComment", firstComment);
     const foundCommit = await Commit.findById(firstComment.id);
-    // console.log("foundCommit", foundCommit._id);
     if (!foundCommit) {
-      Commit.create({ ...firstComment, comments: subComments })
-        .then(async (doc) => {
-          console.log(`Stored Commit for Build ${doc.buildNumber}`);
-          await sendSingleComment(DatamineBot, doc);
-        })
-        .catch((err) =>
-          console.log(
-            `Error storing commit (${firstComment._id}) for build ${commit.buildNumber}`,
-            err.stack
-          )
+      console.log("Needs to store:", commit.buildNumber);
+      try {
+        const doc = await Commit.create({
+          ...firstComment,
+          comments: subComments,
+        });
+        console.log(`Stored Commit ${doc._id} for Build ${doc.buildNumber}`);
+        await sendSingleComment(DatamineBot, doc);
+      } catch (error) {
+        console.error(
+          `Error storing commit (${firstComment._id}) for build ${commit.buildNumber}`,
+          err.stack
         );
+      }
     } else {
-      for (const comment of subComments) {
+      subComments.forEach(async (comment) => {
         if (foundCommit._id === comment.id) return;
         if (foundCommit.comments.find((c) => c.id === comment.id)) return;
-        Commit.updateOne(
-          { _id: foundCommit._id },
-          { $push: { comments: comment } }
-        )
-          .then(async () => {
-            console.log(
-              `Stored comment ${comment.id} for Commit ${foundCommit._id}`
-            );
-            await sendSingleComment(DatamineBot, {
-              _id: foundCommit._id,
-              title: foundCommit.title,
-              ...comment,
-            });
-          })
-          .catch((err) =>
-            console.log(
-              `Error storing comment (${command.id}) commit (${foundCommit._id}) for build ${foundCommit.buildNumber}`,
-              err.stack
-            )
+        try {
+          await Commit.updateOne(
+            { _id: foundCommit._id },
+            { $push: { comments: comment } }
           );
-      }
+          console.log(
+            `Stored comment ${comment.id} for Commit ${foundCommit._id}`
+          );
+          await sendSingleComment({
+            _id: foundCommit._id,
+            title: foundCommit.title,
+            ...comment,
+          });
+        } catch (error) {
+          console.error(
+            `Error storing comment (${command.id}) commit (${foundCommit._id}) for build ${foundCommit.buildNumber}`,
+            err.stack
+          );
+        }
+      });
     }
-  }
+  });
 };
