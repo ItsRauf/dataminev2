@@ -11,7 +11,7 @@ module.exports = async function sendCommits(DatamineBot, comment) {
   try {
     Server.find().then((servers) => {
       servers.forEach(async (server) => {
-        const s = await DatamineBot.guilds.resolve(server._id);
+        const s = await DatamineBot.guilds.fetch(server._id);
         if (s) {
           Server.findByIdAndUpdate(
             s.id,
@@ -22,7 +22,7 @@ module.exports = async function sendCommits(DatamineBot, comment) {
                 /**
                  * @type {TextChannel}
                  */
-                const channel = s.channels.resolve(server.channel);
+                const channel = s.channels.fetch(server.channel);
                 sendEmbed(channel, comment, server.roleid);
               }
             }
