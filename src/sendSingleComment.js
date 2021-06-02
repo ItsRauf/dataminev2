@@ -22,7 +22,7 @@ module.exports = async function sendCommits(DatamineBot, comment) {
                 /**
                  * @type {TextChannel}
                  */
-                const channel = s.channels.fetch(server.channel);
+                const channel = s.channels.resolve(server.channel);
                 sendEmbed(channel, comment, server.roleid);
               }
             }
