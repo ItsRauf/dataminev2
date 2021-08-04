@@ -9,8 +9,8 @@ const DatamineBot = require("./bot");
  * @param {string} title
  */
 function parseBuildNumber(title) {
-  const regex = /(Canary\sbuild:\s([0-9]*))/;
-  return regex.exec(title)[2];
+  const regex = /Build ([0-9]*)/;
+  return regex.exec(title)[1];
 }
 
 const RequestOptions = {
