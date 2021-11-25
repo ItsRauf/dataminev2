@@ -11,7 +11,7 @@ module.exports = async function sendEmbed(channel, commit, roleid) {
     if (!commit) return;
 
     const commitMSG = await channel.send(
-      roleid ? `<@&${roleid}>` : "",
+      roleid ? `<@${roleid}>` : "",
       ConstructEmbed(commit)
     );
 
