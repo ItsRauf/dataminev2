@@ -49,10 +49,13 @@ export default async function sendAnnouncement(
               server.channel
             ) as TextChannel;
             if (channel) {
-              await channel.send({
+              const msg = await channel.send({
                 content: server.role ? `<@&${server.role}>` : null,
                 embeds: [embed],
               });
+              if (msg.crosspostable) {
+                await msg.crosspost();
+              }
             }
           }
         }
