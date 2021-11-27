@@ -20,7 +20,7 @@ export default new SlashCommand(
             name: 'channel',
             description: 'Set the channel that will receive Datamine posts',
             required: true,
-            channel_types: [0],
+            channel_types: [0, 5],
           },
         ],
       },
