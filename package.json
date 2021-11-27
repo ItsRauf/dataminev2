@@ -1,0 +1,66 @@
+{
+  "name": "dataminev2",
+  "version": "1.0.0-slash",
+  "description": "Discord Datamine Bot",
+  "keywords": [
+    "discord",
+    "typescript",
+    "datamine",
+    "discord.js"
+  ],
+  "main": "./build/main.js",
+  "scripts": {
+    "precompile": "yarn lint",
+    "compile": "tsc -b",
+    "lint": "prettier --check \"src/**/*.ts\"",
+    "postlint": "eslint src --ext .ts",
+    "lint:fix": "prettier --write \"src/**/*.ts\"",
+    "postlint:fix": "eslint src --ext .ts --fix",
+    "dev": "nodemon src/main.ts",
+    "start": "node --unhandled-rejections=strict --trace-warnings --trace-uncaught --experimental-specifier-resolution=node build/main.js"
+  },
+  "_moduleAliases": {},
+  "author": "Rauf",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ItsRauf/esmcord.git"
+  },
+  "types": "./build/mod.d.ts",
+  "devDependencies": {
+    "@swc/cli": "^0.1.45",
+    "@swc/core": "^1.2.59",
+    "@types/node": "^16.4.13",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0",
+    "typescript": "^4.4.1-rc"
+  },
+  "engines": {
+    "node": ">=12.2.0"
+  },
+  "dependencies": {
+    "@sentry/node": "^6.11.0",
+    "@sentry/tracing": "^6.11.0",
+    "@swc-node/register": "^1.3.2",
+    "@swc/helpers": "^0.2.12",
+    "@types/module-alias": "^2.0.0",
+    "@types/ws": "^7.4.4",
+    "ansi-colors": "^4.1.1",
+    "discord-api-types": "^0.22.0",
+    "discord.js": "13.2.0",
+    "module-alias": "^2.2.2",
+    "mongodb": "^4.1.0",
+    "mongoose": "^5.13.5",
+    "nodemon": "^2.0.15",
+    "octokit": "^1.6.2",
+    "reflect-metadata": "^0.1.13",
+    "ts-node": "^10.2.0",
+    "ws": "^8.0.0"
+  }
+}

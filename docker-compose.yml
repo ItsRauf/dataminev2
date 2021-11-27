@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  bot:
+    build: '.'
+    volumes:
+      - 'bot_data:/datamine'
+    depends_on:
+      - 'mongo'
+    deploy:
+      restart_policy:
+        condition: 'on-failure'
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  bot_data:
+  mongo_data:
