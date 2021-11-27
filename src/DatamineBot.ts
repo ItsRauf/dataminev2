@@ -25,7 +25,11 @@ export class DatamineBot extends Client {
         default: SlashCommand;
       };
       if (this.application) {
-        const cmd = await this.application.commands.create(command.data);
+        const cmds = await this.application.commands.fetch();
+        let cmd = cmds.find(c => c.name === command.data.name);
+        if (!cmd) {
+          cmd = await this.application.commands.create(command.data);
+        }
         this.commands.set(cmd.id, command);
         console.log(`Loaded Command: ${cmd.name}`);
       }
