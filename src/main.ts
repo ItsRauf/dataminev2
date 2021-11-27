@@ -3,7 +3,8 @@ import { DatamineBot } from './DatamineBot';
 config();
 
 const datamine = new DatamineBot({
-  intents: ['GUILDS', 'GUILD_MESSAGES'],
+  partials: ['CHANNEL', 'GUILD_MEMBER'],
+  intents: ['GUILDS', 'DIRECT_MESSAGES'],
 });
 
 (async () => {
