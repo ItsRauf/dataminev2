@@ -41,8 +41,11 @@ export default async function sendAnnouncement(
   );
   if (btn) {
     if (btn.isButton()) {
-      await btn.deferReply();
       if (btn.customId === `${id}-confirm`) {
+        await btn.update({
+          content: 'Confirmed',
+          components: [],
+        });
         for (const server of servers) {
           const guild = await $.guilds.fetch(server._id);
           if (guild) {
@@ -50,29 +53,23 @@ export default async function sendAnnouncement(
               server.channel
             )) as TextChannel;
             if (channel) {
-              await btn.followUp({
-                content: `Sending to  (${guild.name}/${channel.name})`,
-                ephemeral: true,
-              });
-              await channel.send({
-                content: server.role ? `<@&${server.role}>` : null,
-                embeds: [embed],
-              });
+              try {
+                console.log(`Sending to ${guild.name} // ${channel.name}`);
+                await channel.send({
+                  content: server.role ? `<@&${server.role}>` : null,
+                  embeds: [embed],
+                });
+              } catch (error) {
+                console.error(`${guild.name} // ${channel.name} errored`);
+              }
             }
           }
         }
-
-        // await btn.update({
-        //   content: 'Confirmed',
-        //   components: [],
-        // });
-        await btn.followUp('Confirmed');
       } else if (btn.customId === `${id}-deny`) {
-        // await btn.update({
-        //   content: 'Denied',
-        //   components: [],
-        // });
-        await btn.followUp('Denied');
+        await btn.update({
+          content: 'Denied',
+          components: [],
+        });
       }
     }
   }
