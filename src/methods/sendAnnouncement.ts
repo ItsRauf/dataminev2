@@ -47,21 +47,36 @@ export default async function sendAnnouncement(
           components: [],
         });
         for (const server of servers) {
-          const guild = await $.guilds.fetch(server._id);
-          if (guild) {
-            const channel = (await guild.channels.fetch(
-              server.channel
-            )) as TextChannel;
-            if (channel) {
+          try {
+            const guild = await $.guilds.fetch(server._id);
+            if (guild) {
               try {
-                console.log(`Sending to ${guild.name} // ${channel.name}`);
-                await channel.send({
-                  content: server.role ? `<@&${server.role}>` : null,
-                  embeds: [embed],
-                });
+                const channel = (await guild.channels.fetch(
+                  server.channel
+                )) as TextChannel;
+                if (channel) {
+                  try {
+                    console.log(`Sending to ${guild.name} // ${channel.name}`);
+                    await channel.send({
+                      content: server.role ? `<@&${server.role}>` : null,
+                      embeds: [embed],
+                    });
+                  } catch (error) {
+                    console.error(`${guild.name} // ${channel.name} errored`);
+                  }
+                }
               } catch (error) {
-                console.error(`${guild.name} // ${channel.name} errored`);
+                console.log(
+                  `${guild.name} is misconfigured. try to contact them if possible`
+                );
               }
+            }
+          } catch (error) {
+            console.log(`Deleting server ${server._id} as it errored`);
+            try {
+              await Server.deleteOne({ _id: server._id });
+            } catch (error) {
+              console.error(error);
             }
           }
         }
