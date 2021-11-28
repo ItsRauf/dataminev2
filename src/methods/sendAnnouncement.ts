@@ -41,34 +41,38 @@ export default async function sendAnnouncement(
   );
   if (btn) {
     if (btn.isButton()) {
+      await btn.deferReply();
       if (btn.customId === `${id}-confirm`) {
         for (const server of servers) {
-          const guild = $.guilds.cache.get(server._id);
+          const guild = await $.guilds.fetch(server._id);
           if (guild) {
-            const channel = guild.channels.cache.get(
+            const channel = (await guild.channels.fetch(
               server.channel
-            ) as TextChannel;
+            )) as TextChannel;
             if (channel) {
-              const msg = await channel.send({
+              await btn.followUp({
+                content: `Sending to  (${guild.name}/${channel.name})`,
+                ephemeral: true,
+              });
+              await channel.send({
                 content: server.role ? `<@&${server.role}>` : null,
                 embeds: [embed],
               });
-              if (msg.crosspostable) {
-                await msg.crosspost();
-              }
             }
           }
         }
 
-        await btn.update({
-          content: 'Confirmed',
-          components: [],
-        });
+        // await btn.update({
+        //   content: 'Confirmed',
+        //   components: [],
+        // });
+        await btn.followUp('Confirmed');
       } else if (btn.customId === `${id}-deny`) {
-        await btn.update({
-          content: 'Denied',
-          components: [],
-        });
+        // await btn.update({
+        //   content: 'Denied',
+        //   components: [],
+        // });
+        await btn.followUp('Denied');
       }
     }
   }
