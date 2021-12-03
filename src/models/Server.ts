@@ -4,7 +4,6 @@ export interface Server {
   _id: string;
   channel: string;
   role?: string;
-  modrole: string;
   lastSentComment?: number;
 }
 
@@ -14,7 +13,6 @@ const ServerSchema = new Schema<Server>({
   _id: { type: String, required: true },
   channel: { type: String, required: true },
   role: String,
-  modrole: { type: String, required: true },
   lastSentComment: Number,
 });
 

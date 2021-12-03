@@ -7,7 +7,6 @@ export default new SlashCommand(
   {
     name: 'resend',
     description: 'Resend comments for a build number',
-    defaultPermission: false,
     options: [
       {
         type: 4,

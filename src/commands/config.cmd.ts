@@ -8,7 +8,6 @@ export default new SlashCommand(
   {
     name: 'config',
     description: "Modify DatamineBot's Config for the Current Server",
-    defaultPermission: false,
     options: [
       {
         type: 1,
@@ -33,19 +32,6 @@ export default new SlashCommand(
             type: 8,
             name: 'role',
             description: 'Set the role that will receive pings about Datamine',
-          },
-        ],
-      },
-      {
-        type: 1,
-        name: 'modrole',
-        description: 'Set the moderator role that can edit config for Datamine',
-        options: [
-          {
-            type: 8,
-            name: 'role',
-            description:
-              'Set the moderator role that can edit config for Datamine',
           },
         ],
       },
@@ -76,10 +62,6 @@ export default new SlashCommand(
             {
               name: 'Channel',
               value: `<#${server.channel}>`,
-            },
-            {
-              name: 'Moderator Role',
-              value: `<@&${server.modrole}>`,
             },
             {
               name: 'Role',
@@ -116,21 +98,6 @@ export default new SlashCommand(
           server.role
             ? `<@&${server.role}> has been set to receive notifications of Datamine posts.`
             : 'Role has been unset'
-        );
-      } catch (error) {
-        i.editReply(`${error}`);
-      }
-    }
-    if (sub === 'modrole') {
-      const modrole = i.options.getRole('modrole', true);
-      try {
-        const server = await Server.findOneAndUpdate(
-          { _id: i.guildId },
-          { modrole: modrole.id },
-          { upsert: true, new: true }
-        );
-        i.editReply(
-          `<@&${server.modrole}> has been set to moderate this server's config of Datamine`
         );
       } catch (error) {
         i.editReply(`${error}`);

@@ -18,12 +18,6 @@ export default new SlashCommand(
       },
       {
         type: 8,
-        name: 'modrole',
-        description: 'Set the moderator role that can edit config for Datamine',
-        required: true,
-      },
-      {
-        type: 8,
         name: 'role',
         description: 'Set the role that will receive pings about Datamine',
       },
@@ -34,7 +28,6 @@ export default new SlashCommand(
       ephemeral: true,
     });
     const channel = i.options.getChannel('channel', true);
-    const modrole = i.options.getRole('modrole', true);
     const role = i.options.getRole('role');
     const exists = await Server.exists({
       _id: i.guildId,
@@ -47,7 +40,6 @@ export default new SlashCommand(
       const server = await Server.create({
         _id: i.guildId,
         channel: channel.id,
-        modrole: modrole.id,
         role: role ? role.id : undefined,
       });
       await i.editReply(
