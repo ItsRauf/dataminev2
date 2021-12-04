@@ -56,28 +56,27 @@ export default async function sendAnnouncement(
                 )) as TextChannel;
                 if (channel) {
                   try {
-                    console.log(`Sending to ${guild.name} // ${channel.name}`);
+                    console.log(
+                      `Sending to ${guild.name} (${guild.id}) // ${channel.name}`
+                    );
                     await channel.send({
                       content: server.role ? `<@&${server.role}>` : null,
                       embeds: [embed],
                     });
                   } catch (error) {
-                    console.error(`${guild.name} // ${channel.name} errored`);
+                    console.error(
+                      `${guild.name} (${guild.id}) // ${channel.name} errored`
+                    );
                   }
                 }
               } catch (error) {
                 console.log(
-                  `${guild.name} is misconfigured. try to contact them if possible`
+                  `${guild.name} (${guild.id}) is misconfigured. try to contact them if possible`
                 );
               }
             }
           } catch (error) {
-            console.log(`Deleting server ${server._id} as it errored`);
-            try {
-              await Server.deleteOne({ _id: server._id });
-            } catch (error) {
-              console.error(error);
-            }
+            console.log(`${server._id} errored`);
           }
         }
       } else if (btn.customId === `${id}-deny`) {

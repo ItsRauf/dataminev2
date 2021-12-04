@@ -37,7 +37,7 @@ export default async function sendCommit(
                   await commitMSG.crosspost();
                 } catch (error) {
                   console.error(
-                    `${guild.name} // ${channel.name} errored on crosspost`
+                    `${guild.name} (${guild.id}) // ${channel.name} errored on crosspost`
                   );
                 }
               }
@@ -56,14 +56,14 @@ export default async function sendCommit(
                         return msg.crosspost();
                       } catch (error) {
                         return console.error(
-                          `${guild.name} // ${channel.name} errored on image crosspost`
+                          `${guild.name} (${guild.id}) // ${channel.name} errored on image crosspost`
                         );
                       }
                     })
                   );
                 } catch (error) {
                   console.error(
-                    `${guild.name} // ${channel.name} errored on image sending`
+                    `${guild.name} (${guild.id}) // ${channel.name} errored on image sending`
                   );
                 }
               }
@@ -74,21 +74,18 @@ export default async function sendCommit(
               }
             }
           } catch (error) {
-            console.error(`${guild.name} // ${channel.name} errored`);
+            console.error(
+              `${guild.name} (${guild.id}) // ${channel.name} errored`
+            );
           }
         }
       } catch (error) {
         console.log(
-          `${guild.name} is misconfigured. try to contact them if possible`
+          `${guild.name} (${guild.id}) is misconfigured. try to contact them if possible`
         );
       }
     }
   } catch (error) {
-    console.log(`Deleting ${server._id} as it errored.`);
-    try {
-      await Server.deleteOne({ _id: server._id });
-    } catch (error) {
-      console.error(error);
-    }
+    console.log(`${server._id} errored.`);
   }
 }
