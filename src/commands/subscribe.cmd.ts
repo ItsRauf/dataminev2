@@ -1,6 +1,5 @@
 import getLatestCommit from '../methods/getLatestCommit';
 import sendCommit from '../methods/sendCommit';
-import setModCommands from '../methods/setModCommands';
 import { Server } from '../models/Server';
 import { SlashCommand } from './SlashCommand';
 
@@ -47,7 +46,6 @@ export default new SlashCommand(
       );
       const [commit] = await getLatestCommit();
       await sendCommit($, commit, server);
-      await setModCommands($, server);
     }
   },
   {
