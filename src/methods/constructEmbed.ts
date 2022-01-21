@@ -5,8 +5,8 @@ export default function constructEmbed(commit: Commit): MessageEmbed {
   return new MessageEmbed({
     title: commit.title,
     description:
-      commit.description.length > 2000
-        ? `${commit.description.substr(0, 2000)}...`
+      commit.description.length > 4091
+        ? `${commit.description.substr(0, 4091)}…\n\`\`\``
         : commit.description,
     url: commit.url,
     author: {
