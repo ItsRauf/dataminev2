@@ -16,7 +16,7 @@ export interface Commit {
   url: string;
   images: string[];
   user: CommitUser;
-  comments: Commit[];
+  comments?: Commit[];
   timestamp: string;
 }
 

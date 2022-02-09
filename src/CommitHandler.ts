@@ -28,10 +28,10 @@ export default async function CommitHandler($: DatamineBot): Promise<void> {
       url: comment.html_url,
       description: comment.body,
       user: {
-        username: comment.user?.login,
-        id: comment.user?.id,
-        avatarURL: comment.user?.avatar_url,
-        url: comment.user?.html_url,
+        username: comment.user!.login,
+        id: comment.user!.id,
+        avatarURL: comment.user!.avatar_url,
+        url: comment.user!.html_url,
       },
       images: comment.images,
     }));
@@ -55,21 +55,28 @@ export default async function CommitHandler($: DatamineBot): Promise<void> {
           (error as Error).stack
         );
       }
+    } else {
+      console.log(
+        `Need to store additional comments for ${foundCommit.buildNumber}`
+      );
+      try {
+        for (const comment of subComments) {
+          if (foundCommit._id === comment.id) return;
+          if (foundCommit.comments!.find(c => c.id === comment.id)) return;
+          await foundCommit.update({
+            $push: { comments: comment },
+          });
+          const servers = await Server.find();
+          for (const server of servers) {
+            await sendCommit($, comment, server);
+          }
+        }
+      } catch (error) {
+        console.error(
+          `Error updating commit (${foundCommit._id}) for build ${foundCommit.buildNumber}`,
+          (error as Error).stack
+        );
+      }
     }
   }
-  // const shas = commits.data
-  //   .filter(c => c.commit.comment_count >= 1)
-  //   .map(c => c.sha);
-  // const comments = await Promise.all(shas.map(sha => getCommitComments(sha)));
-  // const commentsData = comments
-  //   .map(c => c.data)
-  //   .reverse()
-  //   .flat();
-  // const parsedComments = commentsData.map(c => ({
-  //   user: c.user,
-  //   body: c.body,
-  //   url: c.html_url,
-  //   id: c.id,
-  // }));
-  // console.log(parsedComments);
 }
