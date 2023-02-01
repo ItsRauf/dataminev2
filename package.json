@@ -56,7 +56,7 @@
     "discord.js": "13.2.0",
     "module-alias": "^2.2.2",
     "mongodb": "^4.1.0",
-    "mongoose": "^5.13.5",
+    "mongoose": "^5.13.15",
     "nodemon": "^2.0.15",
     "octokit": "^1.6.2",
     "reflect-metadata": "^0.1.13",
